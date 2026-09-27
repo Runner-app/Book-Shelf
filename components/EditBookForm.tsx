@@ -15,6 +15,7 @@ export function EditBookForm({ book }: { book: Book }) {
     publisher: book.publisher ?? "",
     coverUrl: book.coverUrl ?? "",
     description: book.description ?? "",
+    finishedAt: book.finishedAt ? book.finishedAt.slice(0, 10) : "",
   });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -99,6 +100,19 @@ export function EditBookForm({ book }: { book: Book }) {
           placeholder="https://..."
           className={inputCls}
         />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className={labelCls}>Data ukończenia</span>
+        <input
+          type="date"
+          value={form.finishedAt ?? ""}
+          onChange={(e) => update("finishedAt", e.target.value)}
+          className={inputCls}
+        />
+        <span className="text-xs text-[#8a7f72]">
+          Zostaw puste, jeśli jeszcze nie skończyłeś.
+        </span>
       </label>
 
       <label className="flex flex-col gap-1">

@@ -9,7 +9,11 @@ async function readLibrary(): Promise<Book[]> {
   try {
     const raw = await readFile(dataFile, "utf8");
     const parsed = JSON.parse(raw) as Book[];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((book) => ({
+      ...book,
+      finishedAt: book.finishedAt ?? null,
+    }));
   } catch {
     return [];
   }

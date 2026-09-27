@@ -85,24 +85,36 @@ export async function updateReading(
       ? book.currentPage
       : clampPage(patch.currentPage, book.pageCount);
   let status = patch.status ?? book.status;
+  let finishedAt = book.finishedAt;
 
   if (patch.status === "want") {
     currentPage = 0;
     status = "want";
+    finishedAt = null;
   } else if (patch.status === "read") {
     status = "read";
     if (book.pageCount) currentPage = book.pageCount;
+    finishedAt = finishedAt ?? new Date().toISOString();
   } else if (patch.status === "reading") {
     status = "reading";
     if (currentPage === 0) currentPage = 1;
+    finishedAt = null;
   } else if (patch.currentPage !== undefined) {
-    status = statusFromProgress(currentPage, book.pageCount);
+    const next = statusFromProgress(currentPage, book.pageCount);
+    // Jeśli z postępu wychodzi "read", ustaw finishedAt
+    if (next === "read" && status !== "read") {
+      finishedAt = finishedAt ?? new Date().toISOString();
+    } else if (next !== "read") {
+      finishedAt = null;
+    }
+    status = next;
   }
 
   const next: Book = {
     ...book,
     currentPage,
     status,
+    finishedAt,
     updatedAt: new Date().toISOString(),
   };
 
@@ -165,6 +177,7 @@ export async function addBookManual(
     currentPage: 0,
     addedAt: now,
     updatedAt: now,
+    finishedAt: null,
   };
 
   try {
@@ -188,6 +201,7 @@ export type BookEditInput = {
   publisher?: string;
   coverUrl?: string;
   description?: string;
+  finishedAt?: string;
 };
 
 export async function updateBook(
@@ -218,6 +232,12 @@ export async function updateBook(
   if (pageCount != null && currentPage > pageCount) currentPage = pageCount;
   if (pageCount == null) currentPage = 0;
 
+  let finishedAt: string | null = existing.finishedAt;
+  if (input.finishedAt !== undefined) {
+    const raw = input.finishedAt.trim();
+    finishedAt = raw ? new Date(`${raw}T12:00:00`).toISOString() : null;
+  }
+
   const next: Book = {
     ...existing,
     title,
@@ -229,6 +249,7 @@ export async function updateBook(
     description: input.description?.trim() || null,
     currentPage,
     updatedAt: new Date().toISOString(),
+    finishedAt,
   };
 
   try {

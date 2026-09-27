@@ -44,6 +44,16 @@ export default async function BookPage({
               .filter(Boolean)
               .join(" · ")}
           </p>
+          {book.finishedAt ? (
+            <p className="mt-2 text-sm text-[#8a7f72]">
+              Przeczytane{" "}
+              {new Date(book.finishedAt).toLocaleDateString("pl-PL", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          ) : null}
           {book.description ? (
             <p className="mt-6 max-w-prose text-sm leading-7 text-[#6b6258]">
               {book.description}

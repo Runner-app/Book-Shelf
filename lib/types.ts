@@ -14,6 +14,7 @@ export type Book = {
   currentPage: number;
   addedAt: string;
   updatedAt: string;
+  finishedAt: string | null;
 };
 
 export type IsbnLookup = {
