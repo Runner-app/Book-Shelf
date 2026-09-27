@@ -16,6 +16,8 @@ export function ReadingControls({ book }: { book: Book }) {
   const [pending, startTransition] = useTransition();
   const [page, setPage] = useState(book.currentPage);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const percent =
     book.pageCount && book.pageCount > 0
@@ -33,6 +35,22 @@ export function ReadingControls({ book }: { book: Book }) {
       }
       setError(null);
       setPage(result.data.currentPage);
+      router.refresh();
+    });
+  }
+
+  function confirmRemove() {
+    setRemoving(true);
+    setError(null);
+    startTransition(async () => {
+      const result = await removeBook(book.id);
+      if (!result.ok) {
+        setError(result.error);
+        setRemoving(false);
+        setConfirmOpen(false);
+        return;
+      }
+      router.push("/");
       router.refresh();
     });
   }
@@ -96,21 +114,51 @@ export function ReadingControls({ book }: { book: Book }) {
 
       <button
         type="button"
-        className="mt-10 text-xs uppercase tracking-[0.16em] text-[#8a7f72]"
-        onClick={() => {
-          startTransition(async () => {
-            const result = await removeBook(book.id);
-            if (!result.ok) {
-              setError(result.error);
-              return;
-            }
-            router.push("/");
-            router.refresh();
-          });
-        }}
+        className="mt-10 cursor-pointer text-xs uppercase tracking-[0.16em] text-[#8a7f72]"
+        onClick={() => setConfirmOpen(true)}
       >
         Usuń z półki
       </button>
+
+      {confirmOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1f1a14]/40 px-4"
+          onClick={() => {
+            if (!removing) setConfirmOpen(false);
+          }}
+        >
+          <div
+            className="w-full max-w-sm bg-[#f7f1e6] p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="font-serif text-xl text-[#1f1a14]">
+              Usunąć tę książkę?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#6b6258]">
+              „{book.title}" zniknie z półki razem z postępem czytania. Tego
+              nie da się cofnąć.
+            </p>
+            <div className="mt-6 flex justify-end gap-5 text-xs uppercase tracking-[0.16em]">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                disabled={removing}
+                className="cursor-pointer text-[#8a7f72] disabled:opacity-40"
+              >
+                Anuluj
+              </button>
+              <button
+                type="button"
+                onClick={confirmRemove}
+                disabled={removing}
+                className="cursor-pointer text-[#8a3d2b] underline underline-offset-4 disabled:opacity-40"
+              >
+                {removing ? "Usuwam…" : "Usuń"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

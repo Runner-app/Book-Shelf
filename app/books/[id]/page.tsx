@@ -21,12 +21,6 @@ export default async function BookPage({
       >
         ← Półka
       </Link>
-      <div className="mt-4 flex gap-5 text-xs uppercase tracking-[0.2em]">
-        <Link href={`/books/${book.id}/edit`} className="text-[#8a7f72]">
-          Edytuj
-        </Link>
-      </div>
-
       <div className="mt-10 flex flex-col gap-10 sm:flex-row">
         <Cover book={book} size="lg" />
         <div>
@@ -34,19 +28,21 @@ export default async function BookPage({
           <p className="mt-3 text-lg text-[#6b6258]">
             {book.authors.join(", ") || "Autor nieznany"}
           </p>
-          <p className="mt-4 text-sm text-[#8a7f72]">
-            {[
-              book.isbn.startsWith("manual:") ? null : `ISBN ${book.isbn}`,
-              book.publisher,
-              book.publishedYear,
-              book.pageCount ? `${book.pageCount} stron` : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
+          <p className="mt-2 ml-4 text-sm text-[#8a7f72]">
+            {[book.isbn.startsWith("manual:") ? null : `ISBN ${book.isbn}`]}
+          </p>
+          <p className="mt-2 ml-4 text-sm text-[#8a7f72]">
+            Liczba stron: {[book.pageCount ? `${book.pageCount} stron` : null]}
+          </p>
+          <p className="mt-2 ml-4 text-sm text-[#8a7f72]">
+            Rok wydania: {[book.publishedYear]}
+          </p>
+          <p className="mt-2 ml-4 text-sm text-[#8a7f72]">
+            Wydawnictwo: {[book.publisher]}
           </p>
           {book.finishedAt ? (
-            <p className="mt-2 text-sm text-[#8a7f72]">
-              Przeczytane{" "}
+            <p className="mt-2 ml-4 text-sm text-[#8a7f72]">
+              Przeczytane: {" "}
               {new Date(book.finishedAt).toLocaleDateString("pl-PL", {
                 day: "numeric",
                 month: "long",
@@ -60,6 +56,11 @@ export default async function BookPage({
             </p>
           ) : null}
           <ReadingControls book={book} />
+          <div className="mt-4 flex gap-5 text-xs uppercase tracking-[0.2em]">
+            <Link href={`/books/${book.id}/edit`} className="text-[#8a7f72]">
+              Edytuj
+            </Link>
+          </div>
         </div>
       </div>
     </div>
